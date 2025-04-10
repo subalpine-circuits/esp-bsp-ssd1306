@@ -1,6 +1,6 @@
 # Component: SSD1306
 
-Port of https://github.com/nopnop2002/esp-idf-ssd1306/tree/master/components/ssd1306 upgraded to the 5.2.x I2C master driver.
+Port of https://github.com/espressif/esp-bsp/tree/1452b261c778453c32a98fe897b571561db95bb5/components/ssd1306 upgraded to the 5.2.x I2C master driver.
 
 ## C example
 ```C
