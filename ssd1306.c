@@ -14,13 +14,13 @@
 #define SSD1306_WRITE_CMD (0x00)
 #define SSD1306_WRITE_DAT (0x40)
 
-#define COORDINATE_SWAP(x1, x2, y1, y2)                                                                                \
-  {                                                                                                                    \
-    int16_t temp = x1;                                                                                                 \
-    x1 = x2, x2 = temp;                                                                                                \
-    temp = y1;                                                                                                         \
-    y1 = y2;                                                                                                           \
-    y2 = temp;                                                                                                         \
+#define COORDINATE_SWAP(x1, x2, y1, y2)                                        \
+  {                                                                            \
+    int16_t temp = x1;                                                         \
+    x1 = x2, x2 = temp;                                                        \
+    temp = y1;                                                                 \
+    y1 = y2;                                                                   \
+    y2 = temp;                                                                 \
   }
 
 typedef struct {
@@ -29,37 +29,45 @@ typedef struct {
   BDF_FONT *bdf_font;
 } ssd1306_dev_t;
 
-static esp_err_t ssd1306_write_data(ssd1306_handle_t dev, const uint8_t *const data, const uint16_t data_len) {
+static esp_err_t ssd1306_write_data(ssd1306_handle_t dev,
+                                    const uint8_t *const data,
+                                    const uint16_t data_len) {
   ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
   esp_err_t ret;
 
   uint8_t *out_buf = (uint8_t *)calloc(data_len + 1, sizeof(uint8_t));
   out_buf[0] = SSD1306_WRITE_DAT;
   memcpy(out_buf + 1, data, data_len);
-  ret = i2c_master_transmit(device->i2c_dev_handle, out_buf, data_len + 1, 1000);
+  ret =
+      i2c_master_transmit(device->i2c_dev_handle, out_buf, data_len + 1, 1000);
   free(out_buf);
 
   return ret;
 }
 
-static esp_err_t ssd1306_write_cmd(ssd1306_handle_t dev, const uint8_t *const data, const uint16_t data_len) {
+static esp_err_t ssd1306_write_cmd(ssd1306_handle_t dev,
+                                   const uint8_t *const data,
+                                   const uint16_t data_len) {
   ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
   esp_err_t ret;
 
   uint8_t *out_buf = (uint8_t *)calloc(data_len + 1, sizeof(uint8_t));
   out_buf[0] = SSD1306_WRITE_CMD;
   memcpy(out_buf + 1, data, data_len);
-  ret = i2c_master_transmit(device->i2c_dev_handle, out_buf, data_len + 1, 1000);
+  ret =
+      i2c_master_transmit(device->i2c_dev_handle, out_buf, data_len + 1, 1000);
   free(out_buf);
 
   return ret;
 }
 
-static inline esp_err_t ssd1306_write_cmd_byte(ssd1306_handle_t dev, const uint8_t cmd) {
+static inline esp_err_t ssd1306_write_cmd_byte(ssd1306_handle_t dev,
+                                               const uint8_t cmd) {
   return ssd1306_write_cmd(dev, &cmd, 1);
 }
 
-void ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1, uint8_t chYpos1, uint8_t chXpos2, uint8_t chYpos2,
+void ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1,
+                            uint8_t chYpos1, uint8_t chXpos2, uint8_t chYpos2,
                             uint8_t chDot) {
   uint8_t chXpos, chYpos;
 
@@ -70,7 +78,8 @@ void ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1, uint8_t chYpo
   }
 }
 
-void ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chPoint) {
+void ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,
+                        uint8_t chPoint) {
   ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
   uint8_t chPos, chBx, chTemp = 0;
 
@@ -88,7 +97,8 @@ void ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, ui
   }
 }
 
-void ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, const uint8_t *pchBmp, uint8_t chWidth,
+void ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,
+                         const uint8_t *pchBmp, uint8_t chWidth,
                          uint8_t chHeight) {
   uint16_t i, j, byteWidth = (chWidth + 7) / 8;
 
@@ -101,7 +111,8 @@ void ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, c
   }
 }
 
-void ssd1306_draw_line(ssd1306_handle_t dev, int16_t chXpos1, int16_t chYpos1, int16_t chXpos2, int16_t chYpos2) {
+void ssd1306_draw_line(ssd1306_handle_t dev, int16_t chXpos1, int16_t chYpos1,
+                       int16_t chXpos2, int16_t chYpos2) {
   // 16-bit variables allowing a display overflow effect
   int16_t x_len = abs(chXpos1 - chXpos2);
   int16_t y_len = abs(chYpos1 - chYpos2);
@@ -156,7 +167,8 @@ void bdf_drawing_function(int x, int y, int c, void *ctx) {
   ssd1306_fill_point(device, x, y, c);
 }
 
-esp_err_t ssd1306_load_bdf_buffer(ssd1306_handle_t dev, void *buffer, int length, bool wrap) {
+esp_err_t ssd1306_load_bdf_buffer(ssd1306_handle_t dev, void *buffer,
+                                  int length, bool wrap) {
   ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
 
   if (!(device->bdf_font = bdfReadBuffer(buffer, length))) {
@@ -184,7 +196,8 @@ esp_err_t ssd1306_load_bdf_file(ssd1306_handle_t dev, FILE *file, bool wrap) {
   return ESP_OK;
 };
 
-void ssd1306_draw_bdf_text(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, char *string) {
+void ssd1306_draw_bdf_text(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,
+                           char *string) {
   ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
   bdfPrintString(device->bdf_font, chXpos, chYpos, string);
 };
@@ -193,7 +206,8 @@ esp_err_t ssd1306_init(ssd1306_handle_t dev) {
   esp_err_t ret;
 
   ssd1306_write_cmd_byte(dev, 0xAE); //--turn off oled panel
-  ssd1306_write_cmd_byte(dev, 0x40); //--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
+  ssd1306_write_cmd_byte(dev, 0x40); //--set start line address  Set Mapping RAM
+                                     //Display Start Line (0x00~0x3F)
   ssd1306_write_cmd_byte(dev, 0x81); //--set contrast control register
   ssd1306_write_cmd_byte(dev, 0xCF); // Set SEG Output Current Brightness
   ssd1306_write_cmd_byte(dev, 0xA1); //--Set SEG/Column Mapping
@@ -201,10 +215,13 @@ esp_err_t ssd1306_init(ssd1306_handle_t dev) {
   ssd1306_write_cmd_byte(dev, 0xA6); //--set normal display
   ssd1306_write_cmd_byte(dev, 0xA8); //--set multiplex ratio(1 to 64)
   ssd1306_write_cmd_byte(dev, 0x3f); //--1/64 duty
-  ssd1306_write_cmd_byte(dev, 0xd5); //--set display clock divide ratio/oscillator frequency
-  ssd1306_write_cmd_byte(dev, 0x80); //--set divide ratio, Set Clock as 100 Frames/Sec
+  ssd1306_write_cmd_byte(
+      dev, 0xd5); //--set display clock divide ratio/oscillator frequency
+  ssd1306_write_cmd_byte(
+      dev, 0x80); //--set divide ratio, Set Clock as 100 Frames/Sec
   ssd1306_write_cmd_byte(dev, 0xD9); //--set pre-charge period
-  ssd1306_write_cmd_byte(dev, 0xF1); // Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
+  ssd1306_write_cmd_byte(
+      dev, 0xF1); // Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
   ssd1306_write_cmd_byte(dev, 0xDA); //--set com pins hardware configuration
   ssd1306_write_cmd_byte(dev, 0xDB); //--set vcomh
   ssd1306_write_cmd_byte(dev, 0x40); // Set VCOM Deselect Level
@@ -222,10 +239,12 @@ esp_err_t ssd1306_init(ssd1306_handle_t dev) {
   cmd2[2] = 7;
   ssd1306_write_cmd(dev, cmd2, sizeof(cmd2)); //--set row address to zero
 
+  ssd1306_clear_screen(dev, 0x00);
+  ssd1306_refresh_gram(dev);
+
   ret = ssd1306_write_cmd_byte(dev, 0xAF); //--turn on oled panel
   ret = 0;
 
-  ssd1306_clear_screen(dev, 0x00);
   return ret;
 }
 
@@ -243,7 +262,8 @@ void ssd1306_delete(ssd1306_handle_t dev) {
 
 esp_err_t ssd1306_refresh_gram(ssd1306_handle_t dev) {
   ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
-  return ssd1306_write_data(dev, &device->s_chDisplayBuffer[0][0], sizeof(device->s_chDisplayBuffer));
+  return ssd1306_write_data(dev, &device->s_chDisplayBuffer[0][0],
+                            sizeof(device->s_chDisplayBuffer));
 }
 
 void ssd1306_clear_screen(ssd1306_handle_t dev, uint8_t chFill) {
