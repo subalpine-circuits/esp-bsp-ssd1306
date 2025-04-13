@@ -17,7 +17,6 @@ extern "C" {
 #endif
 
 #include "driver/i2c_master.h"
-#include "ssd1306_fonts.h"
 #include "stdint.h"
 
 /**
@@ -66,7 +65,8 @@ void ssd1306_delete(ssd1306_handle_t dev);
  * @param   chYpos Specifies the Y position
  * @param   chPoint fill point
  */
-void ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chPoint);
+void ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,
+                        uint8_t chPoint);
 
 /**
  * @brief   Draw rectangle on (x1,y1)-(x2,y2)
@@ -78,7 +78,8 @@ void ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, ui
  * @param   chYpos2
  * @param   chDot fill point
  */
-void ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1, uint8_t chYpos1, uint8_t chXpos2, uint8_t chYpos2,
+void ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1,
+                            uint8_t chYpos1, uint8_t chXpos2, uint8_t chYpos2,
                             uint8_t chDot);
 
 /**
@@ -91,7 +92,8 @@ void ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1, uint8_t chYpo
  * @param   chWidth picture width
  * @param   chHeight picture heght
  */
-void ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, const uint8_t *pchBmp, uint8_t chWidth,
+void ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,
+                         const uint8_t *pchBmp, uint8_t chWidth,
                          uint8_t chHeight);
 
 /**
@@ -103,7 +105,8 @@ void ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, c
  * @param   chXpos2 Specifies the X position of the ending point of the line
  * @param   chYpos2 Specifies the Y position of the ending point of the line
  */
-void ssd1306_draw_line(ssd1306_handle_t dev, int16_t chXpos1, int16_t chYpos1, int16_t chXpos2, int16_t chYpos2);
+void ssd1306_draw_line(ssd1306_handle_t dev, int16_t chXpos1, int16_t chYpos1,
+                       int16_t chXpos2, int16_t chYpos2);
 
 /**
  * @brief   load a BDF font via buffer
@@ -113,7 +116,8 @@ void ssd1306_draw_line(ssd1306_handle_t dev, int16_t chXpos1, int16_t chYpos1, i
  * @param   length length of buffer
  * @param   wrap whether text should wrap
  */
-esp_err_t ssd1306_load_bdf_buffer(ssd1306_handle_t dev, void *buffer, int length, bool wrap);
+esp_err_t ssd1306_load_bdf_buffer(ssd1306_handle_t dev, void *buffer,
+                                  int length, bool wrap);
 
 /**
  * @brief   load a BDF font via file
@@ -132,7 +136,8 @@ esp_err_t ssd1306_load_bdf_file(ssd1306_handle_t dev, FILE *file, bool wrap);
  * @param   chYpos y coord
  * @param   string string to draw
  */
-void ssd1306_draw_bdf_text(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, char *string);
+void ssd1306_draw_bdf_text(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,
+                           char *string);
 
 /**
  * @brief   refresh dot matrix panel
