@@ -82,52 +82,6 @@ void ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1, uint8_t chYpo
                             uint8_t chDot);
 
 /**
- * @brief   display char on (x, y),and set size, mode
- *
- * @param   dev object handle of ssd1306
- * @param   chXpos Specifies the X position
- * @param   chYpos Specifies the Y position
- * @param   chSize char size
- * @param   chChr draw char
- * @param   chMode display mode
- */
-void ssd1306_draw_char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChr, uint8_t chSize,
-                       uint8_t chMode);
-
-/**
- * @brief   display number on (x, y),and set length, size, mode
- *
- * @param   dev object handle of ssd1306
- * @param   chXpos Specifies the X position
- * @param   chYpos Specifies the Y position
- * @param   chNum draw num
- * @param   chLen length
- * @param   chSize display size
- */
-void ssd1306_draw_num(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint32_t chNum, uint8_t chLen,
-                      uint8_t chSize);
-
-/**
- * @brief   display 1616char on (x, y)
- *
- * @param   dev object handle of ssd1306
- * @param   chXpos Specifies the X position
- * @param   chYpos Specifies the Y position
- * @param   chChar draw char
- */
-void ssd1306_draw_1616char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChar);
-
-/**
- * @brief   display 3216char on (x, y)
- *
- * @param   dev object handle of ssd1306
- * @param   chXpos Specifies the X position
- * @param   chYpos Specifies the Y position
- * @param   chChar draw char
- */
-void ssd1306_draw_3216char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChar);
-
-/**
  * @brief   draw bitmap on (x, y),and set width, height
  *
  * @param   dev object handle of ssd1306
@@ -152,6 +106,35 @@ void ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, c
 void ssd1306_draw_line(ssd1306_handle_t dev, int16_t chXpos1, int16_t chYpos1, int16_t chXpos2, int16_t chYpos2);
 
 /**
+ * @brief   load a BDF font via buffer
+ *
+ * @param   dev object handle of ssd1306
+ * @param   buffer pointer to buffer
+ * @param   length length of buffer
+ * @param   wrap whether text should wrap
+ */
+esp_err_t ssd1306_load_bdf_buffer(ssd1306_handle_t dev, void *buffer, int length, bool wrap);
+
+/**
+ * @brief   load a BDF font via file
+ *
+ * @param   dev object handle of ssd1306
+ * @param   file font file
+ * @param   wrap whether text should wrap
+ */
+esp_err_t ssd1306_load_bdf_file(ssd1306_handle_t dev, FILE *file, bool wrap);
+
+/**
+ * @brief   draw text using BDF font
+ *
+ * @param   dev object handle of ssd1306
+ * @param   chXpos x coord
+ * @param   chYpos y coord
+ * @param   string string to draw
+ */
+void ssd1306_draw_bdf_text(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, char *string);
+
+/**
  * @brief   refresh dot matrix panel
  *
  * @param   dev object handle of ssd1306
@@ -169,19 +152,6 @@ esp_err_t ssd1306_refresh_gram(ssd1306_handle_t dev);
  * @param   chFill whether fill and fill char
  **/
 void ssd1306_clear_screen(ssd1306_handle_t dev, uint8_t chFill);
-
-/**
- * @brief   Displays a string on the screen
- *
- * @param   dev object handle of ssd1306
- * @param   chXpos Specifies the X position
- * @param   chYpos Specifies the Y position
- * @param   pchString Pointer to a string to display on the screen
- * @param   chSize char size
- * @param   chMode display mode
- **/
-void ssd1306_draw_string(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, const uint8_t *pchString, uint8_t chSize,
-                         uint8_t chMode);
 
 #ifdef __cplusplus
 }

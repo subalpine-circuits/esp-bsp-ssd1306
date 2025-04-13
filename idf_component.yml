@@ -1,4 +1,4 @@
-version: "1.0.0"
+version: "1.1.0"
 description: I2C driver for SSD1306 OLED display
 url: https://github.com/subalpine-circuits/esp-bsp-ss1306
 dependencies:

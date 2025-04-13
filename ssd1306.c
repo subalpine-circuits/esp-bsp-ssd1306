@@ -8,6 +8,7 @@
 // Copyright 20
 #include "ssd1306.h"
 #include "driver/i2c_master.h"
+#include "nvbdflib.h"
 #include "string.h" // for memset
 
 #define SSD1306_WRITE_CMD (0x00)
@@ -25,15 +26,8 @@
 typedef struct {
   i2c_master_dev_handle_t i2c_dev_handle;
   uint8_t s_chDisplayBuffer[128][8];
+  BDF_FONT *bdf_font;
 } ssd1306_dev_t;
-
-static uint32_t _pow(uint8_t m, uint8_t n) {
-  uint32_t result = 1;
-  while (n--) {
-    result *= m;
-  }
-  return result;
-}
 
 static esp_err_t ssd1306_write_data(ssd1306_handle_t dev, const uint8_t *const data, const uint16_t data_len) {
   ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
@@ -76,81 +70,6 @@ void ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1, uint8_t chYpo
   }
 }
 
-void ssd1306_draw_num(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint32_t chNum, uint8_t chLen,
-                      uint8_t chSize) {
-  uint8_t i;
-  uint8_t chTemp, chShow = 0;
-
-  for (i = 0; i < chLen; i++) {
-    chTemp = (chNum / _pow(10, chLen - i - 1)) % 10;
-    if (chShow == 0 && i < (chLen - 1)) {
-      if (chTemp == 0) {
-        ssd1306_draw_char(dev, chXpos + (chSize / 2) * i, chYpos, ' ', chSize, 1);
-        continue;
-      } else {
-        chShow = 1;
-      }
-    }
-    ssd1306_draw_char(dev, chXpos + (chSize / 2) * i, chYpos, chTemp + '0', chSize, 1);
-  }
-}
-
-void ssd1306_draw_char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChr, uint8_t chSize,
-                       uint8_t chMode) {
-  uint8_t i, j;
-  uint8_t chTemp, chYpos0 = chYpos;
-
-  chChr = chChr - ' ';
-  for (i = 0; i < chSize; i++) {
-    if (chSize == 12) {
-      if (chMode) {
-        chTemp = c_chFont1206[chChr][i];
-      } else {
-        chTemp = ~c_chFont1206[chChr][i];
-      }
-    } else {
-      if (chMode) {
-        chTemp = c_chFont1608[chChr][i];
-      } else {
-        chTemp = ~c_chFont1608[chChr][i];
-      }
-    }
-
-    for (j = 0; j < 8; j++) {
-      if (chTemp & 0x80) {
-        ssd1306_fill_point(dev, chXpos, chYpos, 1);
-      } else {
-        ssd1306_fill_point(dev, chXpos, chYpos, 0);
-      }
-      chTemp <<= 1;
-      chYpos++;
-
-      if ((chYpos - chYpos0) == chSize) {
-        chYpos = chYpos0;
-        chXpos++;
-        break;
-      }
-    }
-  }
-}
-
-void ssd1306_draw_string(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, const uint8_t *pchString, uint8_t chSize,
-                         uint8_t chMode) {
-  while (*pchString != '\0') {
-    if (chXpos > (SSD1306_WIDTH - chSize / 2)) {
-      chXpos = 0;
-      chYpos += chSize;
-      if (chYpos > (SSD1306_HEIGHT - chSize)) {
-        chYpos = chXpos = 0;
-        ssd1306_clear_screen(dev, 0x00);
-      }
-    }
-    ssd1306_draw_char(dev, chXpos, chYpos, *pchString, chSize, chMode);
-    chXpos += chSize / 2;
-    pchString++;
-  }
-}
-
 void ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chPoint) {
   ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
   uint8_t chPos, chBx, chTemp = 0;
@@ -166,46 +85,6 @@ void ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, ui
     device->s_chDisplayBuffer[chXpos][chPos] |= chTemp;
   } else {
     device->s_chDisplayBuffer[chXpos][chPos] &= ~chTemp;
-  }
-}
-
-void ssd1306_draw_1616char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChar) {
-  uint8_t i, j;
-  uint8_t chTemp = 0, chYpos0 = chYpos, chMode = 0;
-
-  for (i = 0; i < 32; i++) {
-    chTemp = c_chFont1612[chChar - 0x30][i];
-    for (j = 0; j < 8; j++) {
-      chMode = chTemp & 0x80 ? 1 : 0;
-      ssd1306_fill_point(dev, chXpos, chYpos, chMode);
-      chTemp <<= 1;
-      chYpos++;
-      if ((chYpos - chYpos0) == 16) {
-        chYpos = chYpos0;
-        chXpos++;
-        break;
-      }
-    }
-  }
-}
-
-void ssd1306_draw_3216char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChar) {
-  uint8_t i, j;
-  uint8_t chTemp = 0, chYpos0 = chYpos, chMode = 0;
-
-  for (i = 0; i < 64; i++) {
-    chTemp = c_chFont3216[chChar - 0x30][i];
-    for (j = 0; j < 8; j++) {
-      chMode = chTemp & 0x80 ? 1 : 0;
-      ssd1306_fill_point(dev, chXpos, chYpos, chMode);
-      chTemp <<= 1;
-      chYpos++;
-      if ((chYpos - chYpos0) == 32) {
-        chYpos = chYpos0;
-        chXpos++;
-        break;
-      }
-    }
   }
 }
 
@@ -271,6 +150,44 @@ void ssd1306_draw_line(ssd1306_handle_t dev, int16_t chXpos1, int16_t chYpos1, i
     } while (len--);
   }
 }
+
+void bdf_drawing_function(int x, int y, int c, void *ctx) {
+  ssd1306_dev_t *device = (ssd1306_dev_t *)ctx;
+  ssd1306_fill_point(device, x, y, c);
+}
+
+esp_err_t ssd1306_load_bdf_buffer(ssd1306_handle_t dev, void *buffer, int length, bool wrap) {
+  ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
+
+  if (!(device->bdf_font = bdfReadBuffer(buffer, length))) {
+    return ESP_FAIL;
+  }
+
+  bdfSetDrawingFunction(bdf_drawing_function, (void *)device);
+  bdfSetDrawingAreaSize(128, 64);
+  bdfSetDrawingWrap(wrap);
+
+  return ESP_OK;
+};
+
+esp_err_t ssd1306_load_bdf_file(ssd1306_handle_t dev, FILE *file, bool wrap) {
+  ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
+
+  if (!(device->bdf_font = bdfReadFile(file))) {
+    return ESP_FAIL;
+  }
+
+  bdfSetDrawingFunction(bdf_drawing_function, (void *)device);
+  bdfSetDrawingAreaSize(128, 64);
+  bdfSetDrawingWrap(wrap);
+
+  return ESP_OK;
+};
+
+void ssd1306_draw_bdf_text(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, char *string) {
+  ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
+  bdfPrintString(device->bdf_font, chXpos, chYpos, string);
+};
 
 esp_err_t ssd1306_init(ssd1306_handle_t dev) {
   esp_err_t ret;

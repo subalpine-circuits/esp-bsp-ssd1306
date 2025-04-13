@@ -2,6 +2,8 @@
 
 Port of https://github.com/espressif/esp-bsp/tree/1452b261c778453c32a98fe897b571561db95bb5/components/ssd1306 upgraded to the 5.2.x I2C master driver.
 
+Now includes http://unhaut.epizy.com/nvbdflib/ for direct BDF font rendering! Be warned that the entire BDF font will be loaded into memory, so trim your font down if you're memory constrained.
+
 ## C example
 ```C
 #include <stdio.h>
@@ -15,6 +17,8 @@ Port of https://github.com/espressif/esp-bsp/tree/1452b261c778453c32a98fe897b571
 #define SSD1306_ADDRESS 0x3C        /*!< OLED address */
 
 static ssd1306_handle_t ssd1306_dev = NULL;
+
+static const char font_buffer[123] = {}; /* from e.g. https://notisrac.github.io/FileToCArray/ */
 
 void app_main(void)
 {
@@ -42,9 +46,13 @@ void app_main(void)
 
   display = ssd1306_create(i2c_dev_handle);
 
+  ssd1306_load_bdf_buffer(display, (void *)font_buffer, 123, false);
+
   char data_str[10] = {0};
   sprintf(data_str, "C STR");
-  ssd1306_draw_string(display, 70, 16, (const uint8_t *)data_str, 16, 1);
+
+  ssd1306_draw_bdf_text(display, 0, 0, data_str);
+  
   ssd1306_refresh_gram(display);
 }
 ```
