@@ -159,7 +159,8 @@ void bdfPrintCharacter(BDF_FONT *font, int x, int y, int character);
  * @param drawFunc Drawing function delegated to do the real drawing.
  */
 
-void bdfSetDrawingFunction(void (*drawFunc)(int x, int y, int c, void *ctx), void *ctx);
+void bdfSetDrawingFunction(void (*drawFunc)(int x, int y, int c, void *ctx),
+                           void *ctx);
 
 /**
  * Set the size of the drawing area.

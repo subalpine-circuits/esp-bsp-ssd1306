@@ -137,7 +137,7 @@ esp_err_t ssd1306_load_bdf_file(ssd1306_handle_t dev, FILE *file, bool wrap);
  * @param   string string to draw
  */
 void ssd1306_draw_bdf_text(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,
-                           char *string);
+                           const char *string);
 
 /**
  * @brief   refresh dot matrix panel

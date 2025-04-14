@@ -197,9 +197,9 @@ esp_err_t ssd1306_load_bdf_file(ssd1306_handle_t dev, FILE *file, bool wrap) {
 };
 
 void ssd1306_draw_bdf_text(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,
-                           char *string) {
+                           const char *string) {
   ssd1306_dev_t *device = (ssd1306_dev_t *)dev;
-  bdfPrintString(device->bdf_font, chXpos, chYpos, string);
+  bdfPrintString(device->bdf_font, chXpos, chYpos, (char *)string);
 };
 
 esp_err_t ssd1306_init(ssd1306_handle_t dev) {
@@ -207,7 +207,7 @@ esp_err_t ssd1306_init(ssd1306_handle_t dev) {
 
   ssd1306_write_cmd_byte(dev, 0xAE); //--turn off oled panel
   ssd1306_write_cmd_byte(dev, 0x40); //--set start line address  Set Mapping RAM
-                                     //Display Start Line (0x00~0x3F)
+                                     // Display Start Line (0x00~0x3F)
   ssd1306_write_cmd_byte(dev, 0x81); //--set contrast control register
   ssd1306_write_cmd_byte(dev, 0xCF); // Set SEG Output Current Brightness
   ssd1306_write_cmd_byte(dev, 0xA1); //--Set SEG/Column Mapping
